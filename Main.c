@@ -10,6 +10,13 @@
 // limitation of 7-segment, 4 digits
 	#define DISP_LIMIT 9999
 
+// interupt count untill 100ms
+// compare with compare_value (I use 1024clk per interupt)
+// 1024clk[time(sec)]*(78+1)[compare value with interupt]*(19+1)[interrupt count till 100ms] = 101.12 ms err 1.12%
+
+	#define interrupt_set 19
+	#define compare_value 78
+
 //this code i just copied from teacher > u < (juse set the How 7_segment bit should be)
 	const unsigned char num[]= {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
 	unsigned char dig1,dig2,dig3,dig4; // just define variable
@@ -20,15 +27,15 @@
 	unsigned char but3_s = 1;
 	unsigned char enable = 0; // status to enable counter
 
-void counting(void) {
-	if (interrupt_count > 19) {
+void counting(void) { //function that timing main time .can use this fungtion anywhere 
+	if (interrupt_count > interrupt_set) { 
 		interrupt_count = 0;
 		if (time_count) {
 			time_count--;
 		}
 	}
 }
-void scan(void) {
+void scan(void) { // function scan to scan the 7 segment
 	static unsigned char digit = 0x80; // static use to create variable only once that don't disappear but cant use outside function
 	switch(digit) {
 		case 0x80: //1st digit.
@@ -50,7 +57,7 @@ void scan(void) {
 	digit >>= 1;
 	if(0x10 > digit) digit=0x80;
 }
-void number(uint16_t cnt) {
+void number(uint16_t cnt) { //use this function to define each digit
 	dig1 =~num[cnt%10]; //active low, use ~
 	cnt /=10;
 	dig2 =~num[cnt%10]; 
@@ -59,7 +66,8 @@ void number(uint16_t cnt) {
 	cnt /=10;
 	dig4 =~num[cnt%10];
 }
-void init_timer0(void) { // you can just paste this in main(void) but i don't do that XD
+void init_timer0(void) { // this function use to declare all of the value to interrupt
+	// you can just paste this in main(void) but i don't do that XD
 	// timing from 06-ch3-HW page 51
 	TCCR0 |= ( 1 << WGM01 ); // CTC auto set 0 when compare match (Clear Timer on Compare)
 	TCCR0 |= ( 1 << CS02 ) | ( 1 << CS00 ); // use timing per 1024clk
@@ -67,7 +75,7 @@ void init_timer0(void) { // you can just paste this in main(void) but i don't do
 
 	TIFR |= ( 1 << TOV0 ); // clear overflow flag
 	TCNT0 = 0x00; // set counter start at 0
-	OCR0 = 78; // set the compare value
+	OCR0 = compare_value; // set the compare value
 }
 ISR(TIMER0_COMP_vect) { //TIMER0_COMP_vect is function(NAME!) in "avr/interrupt.h" that declared! HOW THE DUCK THAT I KNOW?!
 	if (enable == 1) interrupt_count++;
@@ -106,7 +114,6 @@ int main(void) {
 			if (but3_s == 1) {
 					if (enable == 0) {
 						enable = !enable;
-						PORTB &= ~(1<<5);
 					}
 					else {
 						time_count = 0;
@@ -120,7 +127,10 @@ int main(void) {
 			but1_s = 1; but2_s = 1; but3_s = 1; _delay_ms(20);
 		}
 		
-		if (!(time_count)) {
+		if (time_count && enable) {
+			PORTB &= ~(1<<5);
+		}
+		else if (!(time_count)) {
 			PORTB |= (1<<5);
 			enable = 0;
 		}
