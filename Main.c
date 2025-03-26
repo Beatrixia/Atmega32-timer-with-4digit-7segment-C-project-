@@ -1,14 +1,15 @@
 /** This code use in my C++ project (its notsafe if you just copie and paste)
 to connect to the real pin please use this setup
-- button 1-3 connect with PORTD0,3,5 and gnd (inthis case I use PORTD[1,3,5,7] to be gnd)
+- button 1-3 connect with PORTD0,3,5 and gnd (in this case I use PORTD[1,3,5,7] to be gnd)
 - 7Segment (PORTC[0-a,1-b,2-c,3-d,4-e,5-f,6-g,7-dp] PORTA[4-en_digit1,5-en_digit2,6-en_digit3,7-en_digit4]
 **/
 
 
-#define F_CPU 16000000UL
+#define F_CPU 16000000UL //defind 16Mhz clk
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // difine variable for code part
 
