@@ -17,7 +17,7 @@ to connect to the real pin please use this setup
 
 	// volatile for ISR (maybe its unnecessary)
 	volatile uint8_t interrupt_count = 0;
-	volatile uint16_t time_count = 299;
+	volatile uint16_t time_count = 0000; // start 7segment with 0000
 
 	// limitation of 7-segment, 4 digits
 	#define DISP_LIMIT 9999
